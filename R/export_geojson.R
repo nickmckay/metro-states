@@ -41,3 +41,18 @@ export <- function(script, out, kind) {
 export("R/metro_states.R", "data/metro_regions.geojson", "metro")
 export("R/city_states.R", "data/city_regions.geojson", "city")
 export("R/state_cities.R", "data/state_cities.geojson", "state")
+
+# Equal-population states (fit saved by R/equal_pop_states.R)
+local({
+  suppressPackageStartupMessages(library(sf))
+  eq <- readRDS("data-raw/equal_pop_fit.rds")$regions
+  eq$lat <- eq$city_lat; eq$lon <- eq$city_lon
+  eq$area_km2 <- round(eq$area_km2)
+  eq$rank <- rank(-eq$area_km2, ties.method = "first")
+  eq$kind <- "equal"
+  g <- st_simplify(eq, dTolerance = 1500, preserveTopology = TRUE)
+  g <- st_transform(g[, c("name", "rank", "pop", "lat", "lon", "area_km2", "kind", "fill", "polsby_popper")], 4326)
+  unlink("data/equal_pop_states.geojson")
+  st_write(g, "data/equal_pop_states.geojson", driver = "GeoJSON",
+           layer_options = "COORDINATE_PRECISION=3", quiet = TRUE)
+})

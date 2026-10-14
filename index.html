@@ -35,6 +35,7 @@
         <button role="radio" aria-checked="true" data-mode="metro">48 largest metros</button>
         <button role="radio" aria-checked="false" data-mode="city">48 largest cities</button>
         <button role="radio" aria-checked="false" data-mode="state">Biggest city per state</button>
+        <button role="radio" aria-checked="false" data-mode="equal">Equal population</button>
       </div>
       <label class="borders"><input type="checkbox" id="showStates" checked> Show today's state lines</label>
     </div>
@@ -50,10 +51,12 @@
         <p class="card-kicker" id="cardKicker">Region</p>
         <h2 id="cardName">Pick a region</h2>
         <dl class="card-stats">
-          <div><dt>Population rank</dt><dd id="cardRank">-</dd></div>
+          <div><dt id="cardRankLabel">Population rank</dt><dd id="cardRank">-</dd></div>
           <div><dt id="cardPopLabel">Metro population</dt><dd id="cardPop">-</dd></div>
           <div><dt>Territory</dt><dd id="cardArea">-</dd></div>
           <div><dt>Share of the lower 48</dt><dd id="cardShare">-</dd></div>
+          <div id="cardKeptRow" hidden><dt>Keeps of its home state</dt><dd id="cardKept">-</dd></div>
+          <div id="cardCompactRow" hidden><dt>Compactness (circle = 1)</dt><dd id="cardCompact">-</dd></div>
         </dl>
         <p class="card-compare" id="cardCompare">Every region is drawn around one city. Hover the map to see how much land it would govern.</p>
       </aside>
@@ -130,6 +133,12 @@
         Big interior cities like Albuquerque, Billings and Boise end up with huge regions. New York keeps only
         1.6% of New York State, squeezed between Newark and Bridgeport.
         <a href="data/state_cities_home_share.csv">How much of its own state each city keeps.</a></p>
+        <p>The equal-population version is different: no cities are chosen in advance. The lower 48 are
+        cut into 48 compact states of about 6.86&nbsp;million people each, using 2020 Census tract populations.
+        It starts from a weighted Voronoi diagram, where each state's center is moved toward its own center
+        of population and its weight is tuned until the populations even out. Then a few border tracts are
+        traded between neighbors to finish the job. Every state lands within 0.5% of the target, and each is
+        named after the largest city inside it.</p>
       </div>
       <div>
         <h3>The borders</h3>
@@ -148,6 +157,8 @@
           <li><a href="data/city_regions.geojson">City regions (GeoJSON)</a></li>
           <li><a href="img/state_cities.png">One-city-per-state map (PNG)</a></li>
           <li><a href="data/state_cities.geojson">One-city-per-state regions (GeoJSON)</a></li>
+          <li><a href="img/equal_pop_states.png">Equal-population map (PNG)</a></li>
+          <li><a href="data/equal_pop_states.geojson">Equal-population states (GeoJSON)</a></li>
           <li><a href="data/metro_states_areas.csv">Region areas (CSV)</a></li>
           <li><a href="https://github.com/nickmckay/metro-states/tree/main/R">R source code</a></li>
         </ul>

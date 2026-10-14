@@ -13,6 +13,7 @@ metro areas is closest? This repo builds the maps, animations and a small static
 | `Rscript R/metro_states.R` | `img/metro_states.png`, `data/metro_states_areas.csv` |
 | `Rscript R/city_states.R` | `img/city_states.png`, `data/city_states_areas.csv` (city-limits version) |
 | `Rscript R/state_cities.R` | `img/state_cities.png`, `data/state_cities_areas.csv`, `data/state_cities_home_share.csv` (each state's largest city) |
+| `Rscript R/equal_pop_states.R` | `img/equal_pop_states.png`, `data/equal_pop_states.csv` (48 equal-population states; downloads 2020 tract populations into `data-raw/`, caches the fitted centres there; `REFIT=1` redoes the search) |
 | `Rscript R/metro_animations.R` | `img/metro_bubbles.gif`, `img/states_to_metros.gif`, `data/state_metro_pairs.csv` (set `SKIP_BUBBLES=1` to only redo the morph) |
 | `Rscript R/export_geojson.R` | `data/*.geojson` for the interactive map |
 

@@ -108,6 +108,7 @@ strong { font-weight: 600; }
   margin-bottom: 14px;
 }
 .toggle {
+  flex-wrap: wrap;
   display: inline-flex;
   border: 1.5px solid var(--ink);
   border-radius: 999px;
@@ -191,6 +192,7 @@ strong { font-weight: 600; }
 }
 .card h2 .swatch { width: 18px; height: 18px; border: 1px solid var(--ink); flex: none; border-radius: 50%; }
 .card-stats { margin: 0; display: grid; gap: 0; }
+.card-stats div[hidden] { display: none; }
 .card-stats div { display: flex; justify-content: space-between; gap: 12px; border-top: 1px dotted var(--rule); padding: 7px 0; }
 .card-stats dt { font-size: 13px; color: var(--ink-soft); }
 .card-stats dd { margin: 0; font-family: var(--mono); font-size: 14px; font-weight: 500; text-align: right; }
@@ -314,6 +316,7 @@ code { font-family: var(--mono); font-size: 0.92em; }
   body { font-size: 16px; }
   .masthead-rule span:nth-child(2) { display: none; }
   .masthead-rule { margin-bottom: 36px; }
+  .toggle { border-radius: 18px; }
   .toggle button { padding: 7px 11px; font-size: 13px; }
   .city-label { font-size: 8px; }
   .extremes .big { font-size: 22px; }

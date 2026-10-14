@@ -54,6 +54,7 @@ const MODE_TEXT = {
   metro: { kicker: "Metro region", pop: "Metro population", resid: "metro", ledger: "Showing the metro-area version." },
   city: { kicker: "City region", pop: "City population", resid: "city", ledger: "Showing the city-limits version." },
   state: { kicker: "State champion", pop: "City population", resid: "city", ledger: "Showing the biggest-city-per-state version." },
+  equal: { kicker: "Equal-population state", pop: "Population", resid: "", rank: "Size rank", ledger: "Showing the equal-population version. Regions are named for their largest city and ranked by area." },
 };
 
 const state = { mode: "metro", pinned: null, data: {}, sortKey: "rank", sortDir: 1 };
@@ -63,12 +64,18 @@ Promise.all([
   d3.json("data/city_regions.geojson"),
   d3.json("data/states.geojson"),
   d3.json("data/state_cities.geojson"),
-]).then(([metro, city, states, perState]) => {
+  d3.csv("data/state_cities_home_share.csv", d3.autoType),
+  d3.json("data/equal_pop_states.geojson"),
+]).then(([metro, city, states, perState, homeShare, equal]) => {
+  // share of its own state each per-state city keeps, keyed like the region names ("City, ST")
+  const kept = new Map(homeShare.map((r) => [`${r.city}, ${r.state}`, r.kept_pct / 100]));
+  for (const f of perState.features) f.properties.kept = kept.get(f.properties.name);
   state.data.metro = rewind(metro);
   state.data.city = rewind(city);
   state.data.state = rewind(perState);
+  state.data.equal = rewind(equal);
   state.states = rewind(states);
-  for (const fc of [metro, city, perState]) {
+  for (const fc of [metro, city, perState, equal]) {
     const total = d3.sum(fc.features, (f) => f.properties.area_km2);
     for (const f of fc.features) {
       const p = f.properties;
@@ -147,12 +154,24 @@ function showCard(d) {
   const p = d.properties;
   document.getElementById("cardKicker").textContent = MODE_TEXT[state.mode].kicker;
   document.getElementById("cardName").innerHTML = `<span class="swatch" style="background:${p.fill}"></span>${p.name}`;
+  document.getElementById("cardRankLabel").textContent = MODE_TEXT[state.mode].rank || "Population rank";
   document.getElementById("cardRank").textContent = `#${p.rank} of 48`;
   document.getElementById("cardPopLabel").textContent = MODE_TEXT[state.mode].pop;
   document.getElementById("cardPop").textContent = fmtPop(p.pop);
   document.getElementById("cardArea").textContent = `${fmt(p.area_km2)} km²`;
   document.getElementById("cardShare").textContent = fmtPct(p.share);
-  document.getElementById("cardCompare").textContent = `${p.name} would govern a territory ${p.cmp.long}.`;
+  document.getElementById("cardKeptRow").hidden = p.kept == null;
+  document.getElementById("cardCompactRow").hidden = p.polsby_popper == null;
+  let sentence = `${p.name} would govern a territory ${p.cmp.long}.`;
+  if (p.kept != null) {
+    document.getElementById("cardKept").textContent = fmtPct(p.kept);
+    sentence = `${p.name} would govern a territory ${p.cmp.long}, keeping ${fmtPct(p.kept)} of its own state.`;
+  }
+  if (p.polsby_popper != null) {
+    document.getElementById("cardCompact").textContent = d3.format(".2f")(p.polsby_popper);
+    sentence = `The ${p.name} state needs a territory ${p.cmp.long} to reach its ${fmtPop(p.pop)} people.`;
+  }
+  document.getElementById("cardCompare").textContent = sentence;
 }
 
 function showDefaultCard() {
@@ -160,9 +179,13 @@ function showDefaultCard() {
   document.getElementById("cardKicker").textContent = "Region";
   document.getElementById("cardName").textContent = "Pick a region";
   document.getElementById("cardPopLabel").textContent = MODE_TEXT[state.mode].pop;
-  for (const id of ["cardRank", "cardPop", "cardArea", "cardShare"]) document.getElementById(id).textContent = "-";
-  document.getElementById("cardCompare").textContent =
-    "Each region is drawn around one city. Hover the map to see how much land it would govern.";
+  document.getElementById("cardRankLabel").textContent = MODE_TEXT[state.mode].rank || "Population rank";
+  for (const id of ["cardRank", "cardPop", "cardArea", "cardShare", "cardKept", "cardCompact"]) document.getElementById(id).textContent = "-";
+  document.getElementById("cardKeptRow").hidden = state.mode !== "state";
+  document.getElementById("cardCompactRow").hidden = state.mode !== "equal";
+  document.getElementById("cardCompare").textContent = state.mode === "equal"
+    ? "Every state here has the same population. Hover the map to see how much land each one needs."
+    : "Each region is drawn around one city. Hover the map to see how much land it would govern.";
 }
 
 function renderExtremes() {
@@ -171,11 +194,14 @@ function renderExtremes() {
   const small = d3.least(ps, (p) => p.area_km2);
   const sparse = d3.least(ps, (p) => p.density);
   const spread = big.area_km2 / small.area_km2;
+  const loser = d3.least(ps, (p) => p.kept), keeper = d3.greatest(ps, (p) => p.kept);
   document.getElementById("extremes").innerHTML = `
     <div><div class="label">Largest</div><div class="big">${big.name}</div><div class="sub">${fmt(big.area_km2)} km², ${big.cmp.short}</div></div>
     <div><div class="label">Smallest</div><div class="big">${small.name}</div><div class="sub">${fmt(small.area_km2)} km², ${small.cmp.short}</div></div>
-    <div><div class="label">Largest ÷ smallest</div><div class="big">${Math.round(spread)}×</div><div class="sub">Real states: Texas is ${Math.round(676587 / 2678)}× Rhode Island</div></div>
-    <div><div class="label">Emptiest per resident</div><div class="big">${sparse.name}</div><div class="sub">${d3.format(".1f")(sparse.density)} ${MODE_TEXT[state.mode].resid} residents per km²</div></div>`;
+    ${state.mode === "state"
+      ? `<div><div class="label">Keeps least of its state</div><div class="big">${loser.name}</div><div class="sub">only ${fmtPct(loser.kept)}; ${keeper.name} keeps ${fmtPct(keeper.kept)}</div></div>`
+      : `<div><div class="label">Largest ÷ smallest</div><div class="big">${Math.round(spread)}×</div><div class="sub">Real states: Texas is ${Math.round(676587 / 2678)}× Rhode Island</div></div>`}
+    <div><div class="label">Emptiest per resident</div><div class="big">${sparse.name}</div><div class="sub">${d3.format(".1f")(sparse.density)} ${MODE_TEXT[state.mode].resid ? MODE_TEXT[state.mode].resid + " " : ""}residents per km²</div></div>`;
 }
 
 function renderLedger() {
