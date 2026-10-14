@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The United States of Nearest Big Metro</title>
+<meta name="description" content="What if the lower 48 were redrawn so that every place belonged to its nearest big metro? An interactive map of 48 metro-states.">
+<meta property="og:title" content="The United States of Nearest Big Metro">
+<meta property="og:description" content="The lower 48, redrawn: every place belongs to whichever of the 48 largest metros is closest.">
+<meta property="og:image" content="img/metro_states.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Public+Sans:ital,wght@0,300..700;1,300..700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-rule">
+    <span>Vol. I</span><span>An Atlas of Alternatives</span><span>48 Regions</span>
+  </div>
+  <p class="kicker">A thought experiment in cartography</p>
+  <h1>The United States<br><em>of Nearest Big Metro</em></h1>
+  <p class="lede">
+    Forget the surveyors, the rivers, and the treaty lines. Suppose every place in the lower 48
+    belonged to whichever of the country's <strong>48 largest metro areas</strong> is closest,
+    as the crow flies. This is the map you'd get.
+  </p>
+</header>
+
+<main>
+  <section class="atlas" aria-label="Interactive map">
+    <div class="atlas-bar">
+      <div class="toggle" role="radiogroup" aria-label="Which 48 places">
+        <button role="radio" aria-checked="true" data-mode="metro">48 largest metros</button>
+        <button role="radio" aria-checked="false" data-mode="city">48 largest cities</button>
+      </div>
+      <label class="borders"><input type="checkbox" id="showStates" checked> Show today's state lines</label>
+    </div>
+
+    <div class="atlas-grid">
+      <figure class="map-wrap">
+        <svg id="map" role="img" aria-label="Map of the contiguous US divided into 48 regions, one per city"></svg>
+        <div id="tip" class="tip" hidden></div>
+        <figcaption class="hint">Hover or tap a region. Click to pin it.</figcaption>
+      </figure>
+
+      <aside class="card" id="card" aria-live="polite">
+        <p class="card-kicker" id="cardKicker">Region</p>
+        <h2 id="cardName">Pick a region</h2>
+        <dl class="card-stats">
+          <div><dt>Metro rank</dt><dd id="cardRank">-</dd></div>
+          <div><dt id="cardPopLabel">Metro population</dt><dd id="cardPop">-</dd></div>
+          <div><dt>Territory</dt><dd id="cardArea">-</dd></div>
+          <div><dt>Share of the lower 48</dt><dd id="cardShare">-</dd></div>
+        </dl>
+        <p class="card-compare" id="cardCompare">Every region is drawn around one city. Hover the map to see how much land it would govern.</p>
+      </aside>
+    </div>
+
+    <div class="extremes" id="extremes"></div>
+  </section>
+
+  <section class="plates">
+    <figure class="plate">
+      <div class="plate-num">Plate II</div>
+      <img src="img/metro_bubbles.gif" alt="Animation: a colored bubble grows outward from each of the 48 metros until bubbles collide, forming the region borders" loading="lazy" width="1100" height="740">
+      <figcaption>
+        <h3>How the borders form</h3>
+        <p>Grow a circle out from every metro at the same speed. Wherever two circles meet, that's
+        a border. Each region ends up being exactly the land its city reaches first. The last
+        place to fill in is north-central Montana, about 1,030&nbsp;km from the nearest big metro.</p>
+      </figcaption>
+    </figure>
+
+    <figure class="plate plate-flip">
+      <div class="plate-num">Plate III</div>
+      <img src="img/states_to_metros.gif" alt="Animation: the current 48 states recolor into the 48 metro regions, spreading outward from each metro" loading="lazy" width="1100" height="740">
+      <figcaption>
+        <h3>From 48 states to 48 metros</h3>
+        <p>Same number of pieces, cut very differently. Each state is paired with one metro region,
+        choosing pairs that overlap and keep the total movement small, and then slides and
+        reshapes into it. The Mountain West collapses into a few giant regions run by Denver,
+        Salt Lake City and Phoenix, and the whole map drifts toward the coasts, where the big
+        metros are. <a href="data/state_metro_pairs.csv">See every pairing.</a></p>
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="ledger">
+    <div class="section-head">
+      <p class="kicker">The ledger</p>
+      <h2>All 48 regions</h2>
+      <p>Click a column to sort. <span id="ledgerMode">Showing the metro-area version.</span></p>
+    </div>
+    <div class="table-scroll">
+      <table id="ledger">
+        <thead>
+          <tr>
+            <th data-key="rank" class="num" aria-sort="ascending">Rank</th>
+            <th data-key="name">Region</th>
+            <th data-key="pop" class="num">Population</th>
+            <th data-key="area_km2" class="num">Territory (km²)</th>
+            <th data-key="density" class="num">People per km² of territory</th>
+            <th data-key="compare">About the size of</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="methods">
+    <div class="section-head">
+      <p class="kicker">Methods</p>
+      <h2>How this was made</h2>
+    </div>
+    <div class="methods-grid">
+      <div>
+        <h3>The 48 places</h3>
+        <p>The main map uses the 48 most populous <strong>Metropolitan Statistical Areas</strong> in the
+        2020 Census. Each one is pinned to its first-named principal city, so Dallas&ndash;Fort Worth
+        sits at Dallas and Riverside&ndash;San Bernardino at Riverside. Honolulu (about 55th) and
+        Anchorage fall below the cut, so all 48 are in the contiguous states.</p>
+        <p>The alternate version uses the 48 largest cities by population inside city limits. That
+        produces oddities like separate regions for Mesa, Long Beach and Oakland, while St. Louis,
+        Pittsburgh and Tampa get none.</p>
+      </div>
+      <div>
+        <h3>The borders</h3>
+        <p>The lower 48 were divided into a 2&nbsp;km grid. Each cell goes to the closest city by
+        <strong>great-circle distance</strong> (straight-line distance over the curved Earth), and
+        the cells are merged into polygons and clipped to the coastline. The result is a spherical
+        Voronoi diagram. It ignores population size, roads, mountains and travel time: Seattle and
+        Riverside count the same.</p>
+      </div>
+      <div>
+        <h3>Get the files</h3>
+        <ul class="files">
+          <li><a href="img/metro_states.png">Metro map (PNG)</a></li>
+          <li><a href="img/city_states.png">City-limits map (PNG)</a></li>
+          <li><a href="data/metro_regions.geojson">Metro regions (GeoJSON)</a></li>
+          <li><a href="data/city_regions.geojson">City regions (GeoJSON)</a></li>
+          <li><a href="data/metro_states_areas.csv">Region areas (CSV)</a></li>
+          <li><a href="https://github.com/nickmckay/metro-states/tree/main/R">R source code</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Populations: U.S. Census Bureau, 2020 Census. State outlines: R <code>maps</code> package.
+  Maps built in R with <code>sf</code>, <code>terra</code> and <code>ggplot2</code>.
+  Interactive map in D3. Areas are approximate.</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
