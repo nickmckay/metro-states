@@ -34,6 +34,7 @@
       <div class="toggle" role="radiogroup" aria-label="Which 48 places">
         <button role="radio" aria-checked="true" data-mode="metro">48 largest metros</button>
         <button role="radio" aria-checked="false" data-mode="city">48 largest cities</button>
+        <button role="radio" aria-checked="false" data-mode="state">Biggest city per state</button>
       </div>
       <label class="borders"><input type="checkbox" id="showStates" checked> Show today's state lines</label>
     </div>
@@ -49,7 +50,7 @@
         <p class="card-kicker" id="cardKicker">Region</p>
         <h2 id="cardName">Pick a region</h2>
         <dl class="card-stats">
-          <div><dt>Metro rank</dt><dd id="cardRank">-</dd></div>
+          <div><dt>Population rank</dt><dd id="cardRank">-</dd></div>
           <div><dt id="cardPopLabel">Metro population</dt><dd id="cardPop">-</dd></div>
           <div><dt>Territory</dt><dd id="cardArea">-</dd></div>
           <div><dt>Share of the lower 48</dt><dd id="cardShare">-</dd></div>
@@ -125,6 +126,10 @@
         <p>The alternate version uses the 48 largest cities by population inside city limits. That
         produces oddities like separate regions for Mesa, Long Beach and Oakland, while St. Louis,
         Pittsburgh and Tampa get none.</p>
+        <p>The third version gives every state exactly one seat: its largest city by population inside city limits.
+        Big interior cities like Albuquerque, Billings and Boise end up with huge regions. New York keeps only
+        1.6% of New York State, squeezed between Newark and Bridgeport.
+        <a href="data/state_cities_home_share.csv">How much of its own state each city keeps.</a></p>
       </div>
       <div>
         <h3>The borders</h3>
@@ -141,6 +146,8 @@
           <li><a href="img/city_states.png">City-limits map (PNG)</a></li>
           <li><a href="data/metro_regions.geojson">Metro regions (GeoJSON)</a></li>
           <li><a href="data/city_regions.geojson">City regions (GeoJSON)</a></li>
+          <li><a href="img/state_cities.png">One-city-per-state map (PNG)</a></li>
+          <li><a href="data/state_cities.geojson">One-city-per-state regions (GeoJSON)</a></li>
           <li><a href="data/metro_states_areas.csv">Region areas (CSV)</a></li>
           <li><a href="https://github.com/nickmckay/metro-states/tree/main/R">R source code</a></li>
         </ul>

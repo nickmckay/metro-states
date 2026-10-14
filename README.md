@@ -12,6 +12,7 @@ metro areas is closest? This repo builds the maps, animations and a small static
 |---|---|
 | `Rscript R/metro_states.R` | `img/metro_states.png`, `data/metro_states_areas.csv` |
 | `Rscript R/city_states.R` | `img/city_states.png`, `data/city_states_areas.csv` (city-limits version) |
+| `Rscript R/state_cities.R` | `img/state_cities.png`, `data/state_cities_areas.csv`, `data/state_cities_home_share.csv` (each state's largest city) |
 | `Rscript R/metro_animations.R` | `img/metro_bubbles.gif`, `img/states_to_metros.gif`, `data/state_metro_pairs.csv` (set `SKIP_BUBBLES=1` to only redo the morph) |
 | `Rscript R/export_geojson.R` | `data/*.geojson` for the interactive map |
 

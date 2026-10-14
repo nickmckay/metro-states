@@ -1,0 +1,49 @@
+"state","city","state_km2","kept_pct"
+"NY","New York",125745,1.6
+"PA","Philadelphia",117114,13.3
+"MA","Boston",20658,27.8
+"VA","Virginia Beach",103483,33.3
+"NJ","Newark",19748,40.8
+"WY","Cheyenne",253100,41.1
+"NE","Omaha",200079,41.2
+"IL","Chicago",145761,43.1
+"LA","New Orleans",119668,43.3
+"AL","Huntsville",132962,43.8
+"MI","Detroit",148119,48.4
+"MN","Minneapolis",218469,48.5
+"SC","Charleston",80177,48.6
+"TX","Houston",683576,49.7
+"NV","Las Vegas",287339,50.2
+"KY","Louisville",105192,51.4
+"CA","Los Angeles",405128,52.1
+"SD","Sioux Falls",200545,52.8
+"WI","Milwaukee",144814,55.4
+"IN","Indianapolis",93829,57.7
+"OR","Portland",248829,60
+"TN","Nashville",109217,60
+"NC","Charlotte",127125,60.5
+"GA","Atlanta",152065,61.8
+"MO","Kansas City",181371,63.4
+"NH","Manchester",24139,63.4
+"IA","Des Moines",145153,65.4
+"CT","Bridgeport",13077,68.4
+"KS","Wichita",213050,68.8
+"MS","Jackson",123195,69.6
+"OH","Columbus",106703,69.9
+"CO","Denver",270609,72.8
+"AZ","Phoenix",294168,72.9
+"ID","Boise",215501,75.2
+"OK","Oklahoma City",180807,75.3
+"WA","Seattle",173292,79
+"VT","Burlington",25195,79.7
+"DE","Wilmington",5208,80.7
+"UT","Salt Lake City",219669,81.8
+"ND","Fargo",183598,84
+"MD","Baltimore",26161,87
+"MT","Billings",380116,87.3
+"WV","Charleston",62960,88
+"FL","Jacksonville",144851,90.3
+"NM","Albuquerque",314327,96.2
+"AR","Little Rock",138290,97.9
+"ME","Portland",83664,99.7
+"RI","Providence",2950,100

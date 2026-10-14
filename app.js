@@ -50,17 +50,25 @@ const gStates = svg.append("g");
 const gCities = svg.append("g");
 const tip = document.getElementById("tip");
 
+const MODE_TEXT = {
+  metro: { kicker: "Metro region", pop: "Metro population", resid: "metro", ledger: "Showing the metro-area version." },
+  city: { kicker: "City region", pop: "City population", resid: "city", ledger: "Showing the city-limits version." },
+  state: { kicker: "State champion", pop: "City population", resid: "city", ledger: "Showing the biggest-city-per-state version." },
+};
+
 const state = { mode: "metro", pinned: null, data: {}, sortKey: "rank", sortDir: 1 };
 
 Promise.all([
   d3.json("data/metro_regions.geojson"),
   d3.json("data/city_regions.geojson"),
   d3.json("data/states.geojson"),
-]).then(([metro, city, states]) => {
+  d3.json("data/state_cities.geojson"),
+]).then(([metro, city, states, perState]) => {
   state.data.metro = rewind(metro);
   state.data.city = rewind(city);
+  state.data.state = rewind(perState);
   state.states = rewind(states);
-  for (const fc of [metro, city]) {
+  for (const fc of [metro, city, perState]) {
     const total = d3.sum(fc.features, (f) => f.properties.area_km2);
     for (const f of fc.features) {
       const p = f.properties;
@@ -69,6 +77,9 @@ Promise.all([
       p.cmp = compareToState(p.area_km2);
     }
   }
+  // the per-state file is ordered by state; rank its cities by population instead
+  d3.sort(perState.features, (f) => -f.properties.pop).forEach((f, i) => (f.properties.rank = i + 1));
+  if (MODE_TEXT[location.hash.slice(1)]) setMode(location.hash.slice(1), false);
   state.projection = d3.geoAlbersUsa().fitExtent([[6, 6], [W - 6, H - 6]], state.data.metro);
   state.path = d3.geoPath(state.projection);
   gStates.selectAll("path").data(state.states.features).join("path")
@@ -134,10 +145,10 @@ function clearActive() { setActive(null); showDefaultCard(); }
 
 function showCard(d) {
   const p = d.properties;
-  document.getElementById("cardKicker").textContent = state.mode === "metro" ? "Metro region" : "City region";
+  document.getElementById("cardKicker").textContent = MODE_TEXT[state.mode].kicker;
   document.getElementById("cardName").innerHTML = `<span class="swatch" style="background:${p.fill}"></span>${p.name}`;
   document.getElementById("cardRank").textContent = `#${p.rank} of 48`;
-  document.getElementById("cardPopLabel").textContent = state.mode === "metro" ? "Metro population" : "City population";
+  document.getElementById("cardPopLabel").textContent = MODE_TEXT[state.mode].pop;
   document.getElementById("cardPop").textContent = fmtPop(p.pop);
   document.getElementById("cardArea").textContent = `${fmt(p.area_km2)} km²`;
   document.getElementById("cardShare").textContent = fmtPct(p.share);
@@ -148,6 +159,7 @@ function showDefaultCard() {
   if (state.pinned) return showCard(state.pinned);
   document.getElementById("cardKicker").textContent = "Region";
   document.getElementById("cardName").textContent = "Pick a region";
+  document.getElementById("cardPopLabel").textContent = MODE_TEXT[state.mode].pop;
   for (const id of ["cardRank", "cardPop", "cardArea", "cardShare"]) document.getElementById(id).textContent = "-";
   document.getElementById("cardCompare").textContent =
     "Each region is drawn around one city. Hover the map to see how much land it would govern.";
@@ -163,7 +175,7 @@ function renderExtremes() {
     <div><div class="label">Largest</div><div class="big">${big.name}</div><div class="sub">${fmt(big.area_km2)} km², ${big.cmp.short}</div></div>
     <div><div class="label">Smallest</div><div class="big">${small.name}</div><div class="sub">${fmt(small.area_km2)} km², ${small.cmp.short}</div></div>
     <div><div class="label">Largest ÷ smallest</div><div class="big">${Math.round(spread)}×</div><div class="sub">Real states: Texas is ${Math.round(676587 / 2678)}× Rhode Island</div></div>
-    <div><div class="label">Emptiest per resident</div><div class="big">${sparse.name}</div><div class="sub">${d3.format(".1f")(sparse.density)} ${state.mode === "metro" ? "metro" : "city"} residents per km²</div></div>`;
+    <div><div class="label">Emptiest per resident</div><div class="big">${sparse.name}</div><div class="sub">${d3.format(".1f")(sparse.density)} ${MODE_TEXT[state.mode].resid} residents per km²</div></div>`;
 }
 
 function renderLedger() {
@@ -188,7 +200,7 @@ function renderLedger() {
     return this.dataset.key === k ? (dir === 1 ? "ascending" : "descending") : null;
   });
   document.getElementById("ledgerMode").textContent =
-    state.mode === "metro" ? "Showing the metro-area version." : "Showing the city-limits version.";
+    MODE_TEXT[state.mode].ledger;
 }
 
 d3.selectAll("#ledger th").on("click", function () {
@@ -198,11 +210,14 @@ d3.selectAll("#ledger th").on("click", function () {
   renderLedger();
 });
 
+function setMode(mode, draw = true) {
+  state.mode = mode;
+  d3.selectAll(".toggle button").attr("aria-checked", function () { return this.dataset.mode === mode; });
+  history.replaceState(null, "", `#${mode}`);
+  if (draw) render();
+}
 d3.selectAll(".toggle button").on("click", function () {
-  if (this.dataset.mode === state.mode) return;
-  state.mode = this.dataset.mode;
-  d3.selectAll(".toggle button").attr("aria-checked", function () { return this.dataset.mode === state.mode; });
-  render();
+  if (this.dataset.mode !== state.mode) setMode(this.dataset.mode);
 });
 
 document.getElementById("showStates").addEventListener("change", (e) => {

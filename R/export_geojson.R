@@ -40,3 +40,4 @@ export <- function(script, out, kind) {
 }
 export("R/metro_states.R", "data/metro_regions.geojson", "metro")
 export("R/city_states.R", "data/city_regions.geojson", "city")
+export("R/state_cities.R", "data/state_cities.geojson", "state")
